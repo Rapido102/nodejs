@@ -1,0 +1,106 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Sample API",
+    "description": "API description in Markdown.",
+    "version": "1.0.0"
+  },
+  "host": "api.example.com",
+  "paths": {
+    "/api/users": {
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "name": "Login",
+        "summary": "Logs in a user",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/User",
+              "type": "object",
+              "properties": {
+                "username": {
+                  "type": "string"
+                },
+                "password": {
+                  "type": "string",
+                  "format": "password"
+                }
+              }
+            },
+            "required": [
+              "username",
+              "password"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User found and logged in successfully"
+          },
+          "401": {
+            "description": "Bad username, not found in db"
+          },
+          "403": {
+            "description": "Username and password don't match"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "name": "Login",
+        "summary": "Logs in a user",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/User",
+              "type": "object",
+              "properties": {
+                "username": {
+                  "type": "string"
+                },
+                "password": {
+                  "type": "string",
+                  "format": "password"
+                }
+              }
+            },
+            "required": [
+              "username",
+              "password"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User found and logged in successfully"
+          },
+          "401": {
+            "description": "Bad username, not found in db"
+          },
+          "403": {
+            "description": "Username and password don't match"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {},
+  "responses": {},
+  "parameters": {},
+  "securityDefinitions": {},
+  "tags": []
+}
