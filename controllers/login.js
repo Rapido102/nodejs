@@ -57,14 +57,14 @@ loginRouter.post('/forgot', async (req, res) => {
     }
     console.log('check user et mail correspondant ====> OK')
 
-    var resettoken = new passwordResetToken({_userId: user.id, resettoken: crypto.randomBytes(16).toString('hex')});
-    user.resetPasswordToken = resettoken
+    const resettoken = new passwordResetToken({_userId: user.id, resettoken: crypto.randomBytes(16).toString('hex')});
+    user.resetPasswordToken = resettoken;
     user.resetPasswordExpires = Date.now() + 3600000;
-    console.log('edition du nouveau token ====> OK')
+    console.log('edition du nouveau token ====> OK');
 
     user.save((resettoken, user));
 
-    console.log('sauvegarde du nouveau token avec l-user ====> OK')
+    console.log('sauvegarde du nouveau token avec l-user ====> OK');
 
     /*passwordResetToken.find({_userId: user._id, resettoken: {$ne: resettoken.resettoken}}).remove().exec();
     res.status(200).json({message: 'Reset Password successfully.'});*/
@@ -141,15 +141,36 @@ loginRouter.get('/valid-password-token/:token', function (req, res) {
     });
 });*/
 
-loginRouter.post('/new-password', async (req, res) => {
+loginRouter.post('/new-password', async (req, res, next) => {
+
     console.log('CHECK PARAMS FINAL ==== ' + req.body.token)
-    const user = User.findOne({resetPasswordToken: {resettoken: req.body.token}});
-    console.log(user)
-    if (!user) {
-        //req.flash('error', 'Password reset token is invalid or has expired.');
-        return res.redirect('/forgot');
-    }
-    console.log('FINAL TOKEN OK !!')
+    const saltRounds = 10;
+    const passwordHash = await bcrypt.hash(req.body.password, saltRounds);
+    const filter = {resettoken: req.body.token, resetPasswordExpires: {$gt: Date.now()}}
+    const update = {passwordHash: passwordHash, resetPasswordToken: undefined, resetPasswordExpires: undefined};
+    /* const user =  await User.findOneAndUpdate(filter, update, (error, doc) => {
+           console.log(error)
+           console.log(doc)
+       });*/
+    const user = await User.findOne({username: req.body.username})
+    user.passwordHash = passwordHash;
+    user.resetPasswordExpires = undefined;
+    user.resetPasswordToken = undefined;
+    user.save()
+   // res.render('/')
+    // console.log(user)
+    // user.passwordHash = passwordHash
+    //  user.save()
+    // console.log(user)
+    /*const user = User.findOne(filter);
+    console.log(user)*/
+    //console.log(user)
+    //  console.log(user)
+    /* if (!user) {
+         //req.flash('error', 'Password reset token is invalid or has expired.');
+         return res.redirect('/forgot');
+     }*/
+    //console.log('FINAL TOKEN OK !!')
     /*User.findOne({
          _id: passwordResetToken._userId
      }, function (err, userEmail, next) {
@@ -158,33 +179,18 @@ loginRouter.post('/new-password', async (req, res) => {
                  .status(409)
                  .json({message: 'User does not exist'});
          }*/
-    User.resetPasswordExpires = undefined;
-    console.log('FINAL USER FIND OK !!')
-    return bcrypt.hash(req.body.password, 10, (err, hash) => {
-        if (err) {
-            return res
-                .status(400)
-                .json({message: 'Error hashing password'});
-        }
-        user.password = hash;
-        user.save(function (err) {
-            if (err) {
-                return res
-                    .status(400)
-                    .json({message: 'Password can not reset.'});
-            } else {
-                userToken.remove();
-                return res
-                    .status(201)
-                    .json({message: 'Password reset successfully'});
-            }
-            console.log('DONNNNNNNNE ENFIN !!!')
+    /* console.log('User.resetPasswordExpires==== ' + user.resetPasswordExpires)
+     user.resetPasswordExpires = undefined;
+     user.resetPasswordToken = undefined;
+     console.log('FINAL USER FIND OK !!')
+     console.log('FIRST PASSWORD === ' + user.passwordHash);
+     user.passwordHash = passwordHash;
+     console.log('SECOND PASSWORD' + user.passwordHash);
+     user.save();*/
+    //console.log("DONNNNNNNNNE")
+    // res.redirect('/');
 
-        });
-    });
 });
-
-
 //_________________________________________________________________________________________________________________
 
 module.exports = loginRouter

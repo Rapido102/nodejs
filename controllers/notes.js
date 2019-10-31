@@ -55,7 +55,7 @@ notesRouter.post('/', async (request, response, next) => {
 
         const savedNote = await note.save();
         user.notes = user.notes.concat(savedNote._id);
-        await user.save()
+        await user.save();
         response.json(savedNote.toJSON());
         console.log('(Controllers/notes)_____note saved!')
     } catch (exception) {
