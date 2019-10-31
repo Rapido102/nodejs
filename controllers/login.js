@@ -57,7 +57,12 @@ loginRouter.post('/forgot', async (req, res) => {
     }
     console.log('check user et mail correspondant ====> OK')
 
-    const resettoken = new passwordResetToken({_userId: user.id, resettoken: crypto.randomBytes(16).toString('hex')});
+    const resettoken = new passwordResetToken({
+        _userId: user.id,
+        resettoken: crypto.randomBytes(16).toString('hex')
+    });
+    console.log(resettoken)
+
     user.resetPasswordToken = resettoken;
     user.resetPasswordExpires = Date.now() + 3600000;
     console.log('edition du nouveau token ====> OK');
@@ -146,18 +151,19 @@ loginRouter.post('/new-password', async (req, res, next) => {
     console.log('CHECK PARAMS FINAL ==== ' + req.body.token)
     const saltRounds = 10;
     const passwordHash = await bcrypt.hash(req.body.password, saltRounds);
-    const filter = {resettoken: req.body.token, resetPasswordExpires: {$gt: Date.now()}}
+    const filter = {resetPasswordToken: {$regex: "" + req.body.token + ""}, resetPasswordExpires: {$gt: Date.now()}}
     const update = {passwordHash: passwordHash, resetPasswordToken: undefined, resetPasswordExpires: undefined};
-    /* const user =  await User.findOneAndUpdate(filter, update, (error, doc) => {
-           console.log(error)
-           console.log(doc)
-       });*/
-    const user = await User.findOne({username: req.body.username})
-    user.passwordHash = passwordHash;
-    user.resetPasswordExpires = undefined;
-    user.resetPasswordToken = undefined;
-    user.save()
-   // res.render('/')
+    await User.findOneAndUpdate(filter, update, (error, doc) => {
+        console.log(error)
+    });
+    console.log('PASSWORD RESET !!!!!!!!!!!!')
+
+    /* const user = await User.findOne({username: req.body.username})
+     user.passwordHash = passwordHash;
+     user.resetPasswordExpires = undefined;
+     user.resetPasswordToken = undefined;
+     user.save()*/
+    // res.render('/')
     // console.log(user)
     // user.passwordHash = passwordHash
     //  user.save()
