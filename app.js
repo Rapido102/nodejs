@@ -29,7 +29,7 @@ const options = {
         },
     },
     // List of files to be processes. You can also set globs './routes/*.js'
-    apis: ['./controllers/*.js'],
+    apis: ['./controllers/*.js', 'app.js'],
 };
 
 const specs = swaggerJsdoc(options);
@@ -44,7 +44,8 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 //_____________________________________________________________________________________
 mongoose.set('useFindAndModify', false);
-mongoose.set('debug', true)
+//_____________________________________________________________________________________
+//mongoose.set('debug', true)
 //_____________________________________________________________________________________
 app.use(logger('dev'));
 app.use(express.json());
@@ -68,6 +69,10 @@ app.use(function (req, res, next) {
     next(createError(404));
 });
 // error handler
+/**
+ * @swagger
+ * /app.use
+ */
 app.use(function (err, req, res, next) {
     // set locals, only providing error in development
     res.locals.message = err.message;
