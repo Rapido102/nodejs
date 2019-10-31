@@ -29,7 +29,7 @@ const options = {
         },
     },
     // List of files to be processes. You can also set globs './routes/*.js'
-    apis: ['./controllers/*.js', 'app.js'],
+    apis: ['./controllers/*.js'],
 };
 
 const specs = swaggerJsdoc(options);
@@ -52,7 +52,7 @@ app.use(express.json());
 app.use(express.urlencoded({extended: false}));
 app.use(cookieParser());
 app.use(express.static('build'));
-app.use(bodyParser.json());
+
 app.use(middleware.requestLogger);
 app.use(cors());
 //___________________________________________________________________________
@@ -69,10 +69,6 @@ app.use(function (req, res, next) {
     next(createError(404));
 });
 // error handler
-/**
- * @swagger
- * /app.use
- */
 app.use(function (err, req, res, next) {
     // set locals, only providing error in development
     res.locals.message = err.message;
@@ -82,6 +78,7 @@ app.use(function (err, req, res, next) {
     res.status(err.status || 500);
     res.render('error');
 });
+app.use(bodyParser.json());
 //_____________________________________________________________________________________
 app.use(middleware.unknownEndpoint)
 app.use(middleware.errorHandler)
