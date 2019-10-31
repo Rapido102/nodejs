@@ -44,6 +44,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 //_____________________________________________________________________________________
 mongoose.set('useFindAndModify', false);
+mongoose.set('debug', true)
 //_____________________________________________________________________________________
 app.use(logger('dev'));
 app.use(express.json());
