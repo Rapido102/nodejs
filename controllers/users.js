@@ -47,12 +47,13 @@ usersRouter.post('/', async (request, response, next) => {
             username: body.username,
             name: body.name,
             email: body.userMail,
+            role: 'user',
             passwordHash,
         });
 
         // user.notes = user.notes.concat(savedNote._id);
         const savedUser = await user.save();
-        console.log(savedUser)
+        console.log(savedUser);
         response.json(savedUser)
     } catch (exception) {
         next(exception)
@@ -97,11 +98,6 @@ usersRouter.get('/', async (request, response) => {
     const users = await User.find({}).populate('notes', {content: 1, date: 1});
     response.json(users.map(u => u.toJSON()))
 });
-
-usersRouter.post('/forgot', async(req,res) => {
-    
-})
-
 
 module.exports = usersRouter;
 

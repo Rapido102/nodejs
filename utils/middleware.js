@@ -1,9 +1,13 @@
-const logger = require('./logger')
+const logger = require('./logger');
+const jwt = require("jsonwebtoken");
+const User = require('../models/user');
+const assert = require("assert");
+
 const requestLogger = (request, response, next) => {
-    console.log('Method:', request.method)
-    console.log('Path:  ', request.path)
-    console.log('Body:  ', request.body)
-    console.log('---')
+    console.log('Method:', request.method);
+    console.log('Path:  ', request.path);
+    console.log('Body:  ', request.body);
+    console.log('---');
     next()
 }
 //+++++++++++++A DEFINIR ! ++++++++++++++++++++++++++++++++
@@ -12,8 +16,8 @@ const unknownEndpoint = (request, response) => {
 }
 //+++++++++++++A DEFINIR ! ++++++++++++++++++++++++++++++++
 const errorHandler = (error, request, response, next) => {
-    console.error('(middleware.js)' + error.message)
-    logger.error('(middleware.js)' + error.message)
+    console.error('(middleware.js)' + error.message);
+    logger.error('(middleware.js)' + error.message);
     if (error.name === 'CastError' && error.kind === 'ObjectId') {
         return response.status(400).send({error: '(middleware.js)malformatted id'})
     } else if (error.name === '(middleware.js)ValidationError') {
@@ -23,11 +27,45 @@ const errorHandler = (error, request, response, next) => {
             error: 'invalid token'
         });
     }
-        next(error)
-    };
+    next(error)
+};
 
-    module.exports = {
-        requestLogger,
-        unknownEndpoint,
-        errorHandler
-    };
+
+//_____CONTROLE SIL Y A UN TOKEN VALIDE_QUI PERMETTRAIT DE CREER DE NOUVELLES NOTES _______________________________
+function getTokenFrom(request) {
+    const authorization = request.get('authorization');
+    if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
+        return authorization.substring(7)
+    }
+    return null
+};
+
+async function decodeUser(request, response, next) {
+    const token = getTokenFrom(request);
+    if (!token) {
+        next();
+        return;
+    }
+
+    const decodedToken = jwt.verify(token, process.env.SECRET);
+    if (!token || !decodedToken.id || token.expiry < Date.now()) {
+        next();
+        return;
+    }
+
+    request.user = await User.findById(decodedToken.id);
+    next();
+}
+
+async function ensureLoggedIn(request, response, next) {
+    assert(!!request.user, "Vous devez être connecté");
+    next();
+}
+
+module.exports = {
+    decodeUser,
+    ensureLoggedIn,
+    requestLogger,
+    unknownEndpoint,
+    errorHandler
+};

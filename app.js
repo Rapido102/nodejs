@@ -1,4 +1,7 @@
+const {decodeUser} = require("./utils/middleware");
+
 require('dotenv').config();
+const assert = require("assert");
 const createError = require('http-errors');
 const express = require('express');
 const path = require('path');
@@ -8,7 +11,6 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const middleware = require('./utils/middleware');
 const mongoose = require('mongoose');
-const crypto = require('crypto');
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
 //_____________________________________________________________________________________
@@ -17,6 +19,7 @@ const notesRouter = require('./controllers/notes');
 const usersRouter = require('./controllers/users');
 const loginRouter = require('./controllers/login');
 const benchRouter = require('./controllers/bench');
+const adminRouter = require('./controllers/admin');
 //_____________________________________________________________________________________
 const app = express();
 const options = {
@@ -55,8 +58,12 @@ app.use(express.static('build'));
 
 app.use(middleware.requestLogger);
 app.use(cors());
+
+app.use(decodeUser);
+
 //___________________________________________________________________________
 app.use('/', indexRouter);
+app.use('/api/admin', adminRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/notes', notesRouter);
 app.use('/api/bench', benchRouter);
@@ -70,13 +77,11 @@ app.use(function (req, res, next) {
 });
 // error handler
 app.use(function (err, req, res, next) {
-    // set locals, only providing error in development
-    res.locals.message = err.message;
-    res.locals.error = req.app.get('env') === 'development' ? err : {};
-
-    // render the error page
+    if (err instanceof assert.AssertionError) {
+        err.status = 402;
+    }
     res.status(err.status || 500);
-    res.render('error');
+    res.json({message: err.message});
 });
 app.use(bodyParser.json());
 //_____________________________________________________________________________________

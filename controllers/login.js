@@ -64,12 +64,13 @@ loginRouter.post('/', async (request, response) => {
     const userForToken = {
         username: user.username,
         id: user._id,
+        expiry: Date.now() + 3600 * 1000
     };
 
     const token = jwt.sign(userForToken, process.env.SECRET);
     response
         .status(200)
-        .send({token, username: user.username, name: user.name, id: user.id})
+        .send({token, username: user.username, name: user.name, id: user.id, role: user.role})
 });
 //_________________________________________________________________________________________________________________
 loginRouter.post('/forgot', async (req, res, next) => {
