@@ -1,4 +1,4 @@
-const {ensureLoggedIn} = require( "../utils/middleware");
+const { ensureLoggedIn } = require("../utils/middleware");
 const Router = require("express-promise-router");
 const notesRouter = Router();
 const Note = require('../models/note');
@@ -8,7 +8,7 @@ notesRouter.use(ensureLoggedIn);
 //_____AFFICHER TOUTES LES NOTES__________________________________________________________________________________
 notesRouter.get('/', async (request, response) => {
     const notes = await Note
-        .find({user: request.user._id}).populate('user', { username: 1, name: 1 });
+        .find({ user: request.user._id }).populate('user', { username: 1, name: 1 });
     response.json(notes.map(note => note.toJSON()))
 });
 
@@ -23,6 +23,12 @@ notesRouter.get('/:id', (request, response, next) => {
         })
         .catch(error => next(error))
 });
+//Route de la recherche de notes========================
+notesRouter.get('/search/:search', async (request, response, next) => {
+    console.log(request.params.search);
+    const note = await Note.find({ $text: { $search: request.params.search } }).populate('user', { username: 1, name: 1 });
+    response.json(note.map(note => note.toJSON()));
+});
 
 notesRouter.post('/', async (request, response, next) => {
     const body = request.body;
@@ -30,14 +36,13 @@ notesRouter.post('/', async (request, response, next) => {
     const note = new Note({
         content: body.content,
         important: body.important || false,
-        date: new Date(),
-        user: user._id
+        date: new Date().toISOString().slice(0, 10),
+        user: request.user._id
     });
     console.log('(Controllers/notes______' + note);
-
     const savedNote = await note.save();
-    user.notes = user.notes.concat(savedNote._id);
-    await user.save();
+    request.user.notes = request.user.notes.concat(savedNote._id);
+    await request.user.save();
     response.json(savedNote.toJSON());
     console.log('(Controllers/notes)_____note saved!')
 });
