@@ -8,21 +8,22 @@ const noteSchema = new mongoose.Schema({
     content: {
         type: String,
         minlength: 5,
-        required: true
+        required: true,
     },
-    date: Date,
+    date: String,
     important: Boolean,
     user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
-    }
+    },
 });
+noteSchema.index({'$**': 'text'});
 //_____________REFORMATAGE DE LA REPONSE !_______________________________________________________________
 noteSchema.set('toJSON', {
     transform: (document, returnedObject) => {
-       returnedObject.id = returnedObject._id.toString()
+        returnedObject.id = returnedObject._id.toString()
         delete returnedObject._id;
-       delete returnedObject.__v
+        delete returnedObject.__v
     }
 });
 //_______________________________________________________________________________________________________
