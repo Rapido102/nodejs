@@ -36,7 +36,8 @@ notesRouter.post('/', async (request, response, next) => {
     const note = new Note({
         content: body.content,
         important: body.important || false,
-        date: new Date().toISOString().slice(0, 10),
+        date: body.date,
+        update: new Date().toISOString().slice(0, 10),
         user: request.user._id
     });
     console.log('(Controllers/notes______' + note);
@@ -61,7 +62,8 @@ notesRouter.put('/:id', (request, response, next) => {
     const note = {
         content: body.content,
         important: body.important,
-        date: body.date
+        date: body.date,
+        update: new Date().toISOString().slice(0, 10),
     };
 
     Note.findByIdAndUpdate(request.params.id, note, { new: true })
