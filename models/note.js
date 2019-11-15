@@ -11,6 +11,7 @@ const noteSchema = new mongoose.Schema({
         required: true,
     },
     date: String,
+    update: String,
     important: Boolean,
     user: {
         type: mongoose.Schema.Types.ObjectId,
