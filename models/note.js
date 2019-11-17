@@ -10,6 +10,7 @@ const noteSchema = new mongoose.Schema({
         minlength: 5,
         required: true,
     },
+    inside: [],
     date: String,
     update: String,
     important: Boolean,

@@ -37,6 +37,7 @@ notesRouter.post('/', async (request, response, next) => {
         content: body.content,
         important: body.important || false,
         date: body.date,
+        inside: body.inside,
         update: new Date().toISOString().slice(0, 10),
         user: request.user._id
     });
@@ -62,6 +63,7 @@ notesRouter.put('/:id', (request, response, next) => {
     const note = {
         content: body.content,
         important: body.important,
+        inside: body.inside,
         date: body.date,
         update: new Date().toISOString().slice(0, 10),
     };
