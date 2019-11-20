@@ -20,7 +20,7 @@ const benchSchema = new mongoose.Schema({
         minlength: 3,
         required: true
     },
-    date: Date,
+    date: String,
     user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
