@@ -18,38 +18,46 @@ benchRouter.get('/', async (request, response) => {
 });
 
 benchRouter.post('/', async (request, response, next) => {
-        const body = request.body;
-        const token = getTokenFrom(request);
-        /*TRY CONTROLE SIL Y A UN TOKEN VALIDE AVANT DE POSTER QUELQUE CHOSE DINTERDIT
-        * Helper function getTokenFrom isolates the token from the authorization header.
-        * The validity of the token is checked with jwt.verify.
-        * The method also decodes the token, or returns the Object which the token was based on*/
-        try {
-            const decodedToken = jwt.verify(token, process.env.SECRET);
-            if (!token || !decodedToken.id) {
-                return response.status(401).json({error: '(Controllers/login/post)token missing or invalid'})
-            }
-
-            const user = await User.findById(decodedToken.id);
-            console.log('USER=='+user)
-            const bench = new Bench({
-                titre: body.titre,
-                resultat: body.resultat,
-                cat: body.cat,
-                date: new Date(),
-                user: user._id
-            });
-            console.log('(Controllers/bench______' + bench);
-
-            const savedBench = await bench.save();
-            user.benchs = user.benchs.concat(savedBench._id);
-            await user.save();
-            response.json(savedBench.toJSON());
-            console.log('(Controllers/notes)benchmark saved!')
-        } catch (exception) {
-            next(exception)
+    const body = request.body;
+    const token = getTokenFrom(request);
+    /*TRY CONTROLE SIL Y A UN TOKEN VALIDE AVANT DE POSTER QUELQUE CHOSE DINTERDIT
+    * Helper function getTokenFrom isolates the token from the authorization header.
+    * The validity of the token is checked with jwt.verify.
+    * The method also decodes the token, or returns the Object which the token was based on*/
+    try {
+        const decodedToken = jwt.verify(token, process.env.SECRET);
+        if (!token || !decodedToken.id) {
+            return response.status(401).json({ error: '(Controllers/login/post)token missing or invalid' })
         }
+
+        const user = await User.findById(decodedToken.id);
+        console.log('USER==' + user)
+        const bench = new Bench({
+            titre: body.titre,
+            resultat: body.resultat,
+            cat: body.cat,
+            date: body.date,
+            user: user._id
+        });
+        console.log('(Controllers/bench______' + bench);
+
+        const savedBench = await bench.save();
+        user.benchs = user.benchs.concat(savedBench._id);
+        await user.save();
+        response.json(savedBench.toJSON());
+        console.log('(Controllers/notes)benchmark saved!')
+    } catch (exception) {
+        next(exception)
     }
+}
 );
+benchRouter.delete('/:id', (request, response, next) => {
+    Bench.findByIdAndRemove(request.params.id)
+        .then(() => {
+            response.status(204).end()
+        })
+        .catch(error => next(error))
+});
+
 
 module.exports = benchRouter;
