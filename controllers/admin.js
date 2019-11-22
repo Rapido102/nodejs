@@ -1,8 +1,10 @@
-//npm uninstall bcrypt --save _________________________________________________________________________
+const { ensureAdmin } = require('../utils/middleware');
 const bcrypt = require('bcrypt');
-//_____________________________________________________________________________________________________
-const adminRouter = require('express').Router();
+const Router = require("express-promise-router");
+const adminRouter = Router();
 const User = require('../models/user');
+
+adminRouter.use(ensureAdmin);
 
 adminRouter.post('/', async (request, response, next) => {
     try {
@@ -29,7 +31,7 @@ adminRouter.post('/', async (request, response, next) => {
 //________AFFICHAGE ALL USERS_______________________________________________________________________________________
 //METHODE POPULATE A EXPLIQUER______________________________________________________________________________________
 adminRouter.get('/', async (request, response) => {
-    const users = await User.find({role:'admin'}).populate('notes', {content: 1, date: 1});
+    const users = await User.find({}).populate('notes', { content: 1, date: 1 });
     response.json(users.map(u => u.toJSON()))
 });
 
