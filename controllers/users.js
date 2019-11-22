@@ -4,39 +4,6 @@ const bcrypt = require('bcrypt');
 const usersRouter = require('express').Router();
 const User = require('../models/user');
 //____AJOUTER DUN NOUVEL UTILISATEUR_________________________________________________________________________
-/**
- * @swagger
- * /api/users:
- *   post:
- *     tags:
- *       - Users
- *     name: Login
- *     summary: Logs in a user
- *     consumes:
- *       - application/json
- *     parameters:
- *       - name: body
- *         in: body
- *         schema:
- *           $ref: '#/definitions/User'
- *           type: object
- *           properties:
- *             username:
- *               type: string
- *             password:
- *               type: string
- *               format: password
- *         required:
- *           - username
- *           - password
- *     responses:
- *       200:
- *         description: User found and logged in successfully
- *       401:
- *         description: Bad username, not found in db
- *       403:
- *         description: Username and password don't match
- */
 usersRouter.post('/', async (request, response, next) => {
     try {
         const body = request.body;
@@ -60,40 +27,6 @@ usersRouter.post('/', async (request, response, next) => {
     }
 });
 //________AFFICHAGE ALL USERS_______________________________________________________________________________________
-//METHODE POPULATE A EXPLIQUER______________________________________________________________________________________
-/**
- * @swagger
- * /api/users:
- *   get:
- *     tags:
- *       - Users
- *     name: Login
- *     summary: Logs in a user
- *     consumes:
- *       - application/json
- *     parameters:
- *       - name: body
- *         in: body
- *         schema:
- *           $ref: '#/definitions/User'
- *           type: object
- *           properties:
- *             username:
- *               type: string
- *             password:
- *               type: string
- *               format: password
- *         required:
- *           - username
- *           - password
- *     responses:
- *       200:
- *         description: User found and logged in successfully
- *       401:
- *         description: Bad username, not found in db
- *       403:
- *         description: Username and password don't match
- */
 usersRouter.get('/', async (request, response) => {
     const users = await User.find({}).populate('notes', {content: 1, date: 1});
     response.json(users.map(u => u.toJSON()))

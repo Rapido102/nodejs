@@ -1,6 +1,7 @@
 const logger = require('./logger');
 const jwt = require("jsonwebtoken");
 const User = require('../models/user');
+const createError = require('http-errors');
 const assert = require("assert");
 
 const requestLogger = (request, response, next) => {
@@ -58,7 +59,17 @@ async function decodeUser(request, response, next) {
 }
 
 async function ensureLoggedIn(request, response, next) {
+    console.log("ensureLoggedIn", !!request.user, request.originalUrl);
     assert(!!request.user, "Vous devez être connecté");
+    next();
+}
+
+async function ensureAdmin(request, response, next) {
+    console.log("ensureAdmin", !!request.user);
+    assert(!!request.user, "Vous devez être connecté");
+    if (request.user.role !== "admin") {
+        throw createError(403);
+    }
     next();
 }
 
@@ -67,5 +78,6 @@ module.exports = {
     ensureLoggedIn,
     requestLogger,
     unknownEndpoint,
+    ensureAdmin,
     errorHandler
 };

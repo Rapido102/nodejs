@@ -8,43 +8,7 @@ const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 const passwordResetToken = require('../models/resetPassword')
 
-//__________________________________________________________________________________________________________________
-/* The code starts by searching for the user from the database by the username attached to the request. Next,
- it checks the password, also attached to the request. Because the passwords themselves are not saved to the database,
-  but hashes calculated from the passwords, bcrypt.compare method is used to check if the password is correct: */
-/**
- * @swagger
- * /api/login:
- *   post:
- *     tags:
- *       - Login
- *     name: Login
- *     summary: Logs in a user
- *     consumes:
- *       - application/json
- *     parameters:
- *       - name: body
- *         in: body
- *         schema:
- *           $ref: '#/definitions/User'
- *           type: object
- *           properties:
- *             username:
- *               type: string
- *             password:
- *               type: string
- *               format: password
- *         required:
- *           - username
- *           - password
- *     responses:
- *       200:
- *         description: User found and logged in successfully
- *       401:
- *         description: Bad username, not found in db
- *       403:
- *         description: Username and password don't match
- */
+
 loginRouter.post('/', async (request, response) => {
     const body = request.body;
 
