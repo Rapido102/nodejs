@@ -37,16 +37,16 @@ server.on('listening', onListening);
  */
 /*_________PERMET DE CONNAITRE SUR QUEL PORT TOURNE LE SERVER PAR LE BIAIS DU FICHIER
 UTILS/CONFIG CONTENANT LE ENV GLOBAL_________________________________________________*/
-console.log(`(App.js)______Server running on port ${config.PORT}`);
-console.log('(App.js)______connecting to', url);
+console.log(`\x1b[32m`,`_________Server running on port ${config.PORT}`);
+console.log('\x1b[32m','_________connecting to', url);
 
 //=======CONNECTION A MONGODB PAR LE BIAIS DE MONGOOSE============
 mongoose.connect(url, {useNewUrlParser: true, useUnifiedTopology: true})
     .then(result => {
-        console.log('(App.js)______connected to MongoDB')
+        console.log('\x1b[32m','_________connected to MongoDB')
     })
     .catch((error) => {
-        console.log('(App.js)error connecting to MongoDB:', error.message)
+        console.log('error connecting to MongoDB:', error.message)
     });
 //_____________________________________________________________________________________
 

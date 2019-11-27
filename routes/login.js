@@ -19,7 +19,7 @@ loginRouter.post('/', async (request, response) => {
 
     if (!(user && passwordCorrect)) {
         return response.status(401).json({
-            error: '(Controllers/login)____ invalid username or password'
+            error: '(routes/login)____ invalid username or password'
         })
     }
     //________________________________________________________________________________________________________________
@@ -34,7 +34,7 @@ loginRouter.post('/', async (request, response) => {
     const token = jwt.sign(userForToken, process.env.SECRET);
     response
         .status(200)
-        .send({token, username: user.username, name: user.name, id: user.id, role: user.role})
+        .send({token, username: user.username, name: user.name, id: user.id, role: user.role, email: user.email, update: user.update})
 });
 //_________________________________________________________________________________________________________________
 loginRouter.post('/forgot', async (req, res, next) => {
