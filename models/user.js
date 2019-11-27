@@ -24,6 +24,7 @@ const userSchema = mongoose.Schema({
             ref: 'Note'
         }
     ],
+    update: String,
     resetPasswordToken: String,
     resetPasswordExpires: Date
 });

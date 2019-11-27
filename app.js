@@ -15,11 +15,11 @@ const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
 //_____________________________________________________________________________________
 const indexRouter = require('./routes/index');
-const notesRouter = require('./controllers/notes');
-const usersRouter = require('./controllers/users');
-const loginRouter = require('./controllers/login');
-const benchRouter = require('./controllers/bench');
-const adminRouter = require('./controllers/admin');
+const notesRouter = require('./routes/notes');
+const usersRouter = require('./routes/users');
+const loginRouter = require('./routes/login');
+const benchRouter = require('./routes/bench');
+const adminRouter = require('./routes/admin');
 //_____________________________________________________________________________________
 const app = express();
 const options = {
@@ -32,7 +32,7 @@ const options = {
         },
     },
     // List of files to be processes. You can also set globs './routes/*.js'
-    apis: ['./controllers/*.js'],
+    apis: ['./routes/*.js'],
 };
 
 const specs = swaggerJsdoc(options);

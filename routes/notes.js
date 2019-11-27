@@ -1,76 +1,78 @@
-const express = require('express');
-const router = express.Router();
-const mysql = require('mysql');
+const { ensureLoggedIn } = require("../utils/middleware");
+const Router = require("express-promise-router");
+const notesRouter = Router();
+const Note = require('../models/note');
 
+notesRouter.use(ensureLoggedIn);
 
-/* GET users listing. */
-router.get('/', function (req, res, next) {
-    db.query('SELECT `id`, `titre` FROM mes_biens', function (error, results, fields) {
-        if (error) throw error;
-        //console.log(results)
-        return res.send({data: results});
-    });
+//_____AFFICHER TOUTES LES NOTES__________________________________________________________________________________
+notesRouter.get('/', async (request, response) => {
+    const notes = await Note
+        .find({ user: request.user._id }).populate('user', { username: 1, name: 1 });
+    response.json(notes.map(note => note.toJSON()))
 });
 
-// appeler cette fonction en utilisant http://127.0.0.1:3000/add
-router.post('/add', function (request, response) {
+notesRouter.get('/:id', (request, response, next) => {
+    Note.findById(request.params.id)
+        .then(note => {
+            if (note) {
+                response.json(note.toJSON())
+            } else {
+                response.status(404).end()
+            }
+        })
+        .catch(error => next(error))
+});
+//Route de la recherche de notes========================
+notesRouter.get('/search/:search', async (request, response, next) => {
+    console.log(request.params.search);
+    const note = await Note.find({ $text: { $search: request.params.search } }).populate('user', { username: 1, name: 1 });
+    response.json(note.map(note => note.toJSON()));
+});
+
+notesRouter.post('/', async (request, response, next) => {
     const body = request.body;
-    if (body.content === undefined) {
-        return response.status(400).json({error: 'content missing'})
-    }
+
     const note = new Note({
         content: body.content,
         important: body.important || false,
-        date: new Date(),
+        date: body.date,
+        inside: body.inside,
+        update: new Date().toISOString().slice(0, 10),
+        user: request.user._id
     });
+    console.log('(Routes/notes______' + note);
+    const savedNote = await note.save();
+    request.user.notes = request.user.notes.concat(savedNote._id);
+    await request.user.save();
+    response.json(savedNote.toJSON());
+    console.log('(Routes/notes)_____note saved!')
+});
 
-    note.save()
-        .then(savedNote => {
-            response.json(savedNote.toJSON())
+notesRouter.delete('/:id', (request, response, next) => {
+    Note.findByIdAndRemove(request.params.id)
+        .then(() => {
+            response.status(204).end()
         })
         .catch(error => next(error))
 });
 
-router.get('/:id', (request, response) => {
-    const id = Number(request.params.id)
-    const note = notes.find(note => note.id === id)
-    if (note) {
-        response.json(note)
-    } else {
-        response.status(404).end()
-    }
-});
-router.delete('/:id', (request, response) => {
-    const id = Number(request.params.id)
-    notes = notes.filter(note => note.id !== id)
-
-    response.status(204).end()
-})
-//========================================================
-const generateId = () => {
-    const maxId = notes.length > 0
-        ? Math.max(...notes.map(n => n.id))
-        : 0
-    return maxId + 1
-}
-router.post('/notes', (request, response) => {
+notesRouter.put('/:id', (request, response, next) => {
     const body = request.body
-
-    if (!body.content) {
-        return response.status(400).json({
-            error: 'content missing'
-        })
-    }
 
     const note = {
         content: body.content,
-        important: body.important || false,
-        date: new Date(),
-        id: generateId(),
-    }
+        important: body.important,
+        inside: body.inside,
+        date: body.date,
+        update: new Date().toISOString().slice(0, 10),
+    };
 
-    notes = notes.concat(note)
+    Note.findByIdAndUpdate(request.params.id, note, { new: true })
+        .then(updatedNote => {
+            response.json(updatedNote.toJSON())
+        })
+        .catch(error => next(error))
+});
 
-    response.json(note)
-})
-module.exports = router;
+module.exports = notesRouter
