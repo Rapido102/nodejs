@@ -1,5 +1,6 @@
 const benchRouter = require('express').Router();
 const Bench = require('../models/bench');
+const { ensureLoggedIn } = require("../utils/middleware");
 const User = require('../models/user');
 const jwt = require('jsonwebtoken');
 
@@ -10,6 +11,8 @@ const getTokenFrom = request => {
     }
     return null
 };
+
+benchRouter.use(ensureLoggedIn);
 
 benchRouter.get('/', async (request, response) => {
     const benchs = await Bench
