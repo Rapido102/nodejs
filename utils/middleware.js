@@ -38,7 +38,7 @@ function getTokenFrom(request) {
     if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
         return authorization.substring(7)
     }
-    return null
+    return null;
 };
 
 async function decodeUser(request, response, next) {

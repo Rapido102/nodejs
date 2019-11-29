@@ -34,31 +34,32 @@ usersRouter.get('/', async (request, response) => {
     response.json(users.map(u => u.toJSON()))
 });
 
-usersRouter.put('/:id', (request, response, next) => {
+usersRouter.put('/:id', async (request, response, next) => {
     const body = request.body
 
-    const user = {
+    const updateUser = {
         username: body.username,
         name: body.name,
         email: body.email,
         update: new Date().toISOString().slice(0, 10),
     };
 
-    User.findByIdAndUpdate(request.params.id, user, { new: true })
-        .then(updateUser => {
-            response.json(updateUser.toJSON());
-            // const user = User.findOne({ id: request.params.id });
-            // const userForToken = {
-            //     username: user.username,
-            //     id: user._id,
-            //     expiry: Date.now() + 3600 * 1000
-            // };
-            // const token = jwt.sign(userForToken, process.env.SECRET);
-            // response
-            //     .status(200)
-            //     .send({ token, username: user.username, name: user.name, id: user.id, role: user.role, email: user.email })
+    User.findByIdAndUpdate(request.params.id, updateUser, { new: true })
+        .then(data => {
+            response.json(data.toJSON());
         })
         .catch(error => next(error))
+
+    // const user = await User.findOne({ id: request.params.id });
+    // const userForToken = {
+    //     username: user.username,
+    //     id: user._id,
+    //     expiry: Date.now() + 3600 * 1000
+    // };
+    // const token = jwt.sign(userForToken, process.env.SECRET);
+    // response
+    //     .status(200)
+    //     .send({ token, username: user.username, name: user.name, id: user.id, role: user.role, email: user.email })
 });
 
 module.exports = usersRouter;
