@@ -19,7 +19,7 @@ const noteSchema = new mongoose.Schema({
         ref: 'User'
     },
 });
-noteSchema.index({'$**': 'text'});
+noteSchema.index({content: "text"});
 //_____________REFORMATAGE DE LA REPONSE !_______________________________________________________________
 noteSchema.set('toJSON', {
     transform: (document, returnedObject) => {

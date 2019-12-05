@@ -25,8 +25,12 @@ notesRouter.get('/:id', (request, response, next) => {
 });
 //Route de la recherche de notes========================
 notesRouter.get('/search/:search', async (request, response, next) => {
-    console.log(request.params.search);
-    const note = await Note.find({ $text: { $search: request.params.search } }).populate('user', { username: 1, name: 1 });
+    console.log("-----------", request.params.search);
+    let query = request.params.search
+
+    const note = await Note.find({ "content": { "$regex": query, "$options": "i" } }).populate('user', { username: 1, name: 1 });
+
+    console.log(note, "---------------note retourned by searching");
     response.json(note.map(note => note.toJSON()));
 });
 
