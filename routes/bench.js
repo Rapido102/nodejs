@@ -54,6 +54,24 @@ benchRouter.post('/', async (request, response, next) => {
     }
 }
 );
+benchRouter.put('/:id', (request, response, next) => {
+    const body = request.body
+    console.log(request.params.id);
+    const bench = {
+        titre: body.titre,
+        resultat: body.resultat,
+        // important: body.important,
+        // inside: body.inside,
+        // date: body.date,
+        update: body.update
+    };
+    Bench.findByIdAndUpdate(request.params.id, bench, { new: true })
+        .then(updateBench => {
+            response.json(updateBench.toJSON())
+        })
+        .catch(error => next(error))
+});
+
 benchRouter.delete('/:id', (request, response, next) => {
     Bench.findByIdAndRemove(request.params.id)
         .then(() => {
