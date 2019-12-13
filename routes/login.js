@@ -11,15 +11,16 @@ const passwordResetToken = require('../models/resetPassword')
 
 loginRouter.post('/', async (request, response) => {
     const body = request.body;
-
-    const user = await User.findOne({username: body.username});
+    console.log('inside body', body)
+    const user = await User.findOne({ username: body.username });
     const passwordCorrect = user === null
         ? false
         : await bcrypt.compare(body.password, user.passwordHash);
 
     if (!(user && passwordCorrect)) {
+        console.log('invalid username or password');
         return response.status(401).json({
-            error: '(routes/login)____ invalid username or password'
+            error: 'invalid username or password'
         })
     }
     //________________________________________________________________________________________________________________
@@ -34,7 +35,7 @@ loginRouter.post('/', async (request, response) => {
     const token = jwt.sign(userForToken, process.env.SECRET);
     response
         .status(200)
-        .send({token, username: user.username, name: user.name, id: user.id, role: user.role, email: user.email, update: user.update})
+        .send({ token, username: user.username, name: user.name, id: user.id, role: user.role, email: user.email, update: user.update })
 });
 //_________________________________________________________________________________________________________________
 loginRouter.post('/forgot', async (req, res, next) => {
@@ -42,26 +43,24 @@ loginRouter.post('/forgot', async (req, res, next) => {
     if (!req.body.userMail) {
         return res
             .status(500)
-            .json({message: 'Email is required'});
+            .json({ message: 'Email is required' });
     }
-    console.log('check reception de l-adresse mail ====> OK')
+    console.log(req.body.userMail, 'check reception de l-adresse mail ====> OK')
     //check si l'email correspond a un utilisteur de la BDD
-
-    const user = await User.findOne({email: req.body.userMail});
-    //console.log(user);
+    const user = await User.findOne({ email: req.body.userMail });
     if (!user) {
         return res
             .status(409)
-            .json({message: 'Email does not exist'});
+            .json({ message: 'Email does not exist' });
 
     }
-    console.log('check user et mail correspondant ====> OK')
+    console.log(user, 'check user et mail correspondant ====> OK')
     const resettoken = new passwordResetToken({
         _userId: user.id,
         resettoken: crypto.randomBytes(16).toString('hex')
     });
     user.resetPasswordToken = resettoken;
-    user.resetPasswordExpires = Date.now() + 3600000;
+    user.resetPasswordExpires = Date.now() + 1000;
     console.log('edition du nouveau token ====> OK');
 
     user.save((resettoken, user));
@@ -71,7 +70,7 @@ loginRouter.post('/forgot', async (req, res, next) => {
     /*passwordResetToken.find({_userId: user._id, resettoken: {$ne: resettoken.resettoken}}).remove().exec();
     res.status(200).json({message: 'Reset Password successfully.'});*/
 
-//configuration de nodemailer pour lenvoye du mail
+    //configuration de nodemailer pour lenvoye du mail
     const transporter = nodemailer.createTransport({
         service: 'Gmail',
         auth: {
@@ -81,7 +80,7 @@ loginRouter.post('/forgot', async (req, res, next) => {
     });
     console.log('creation transport pour envoie mail ====> OK')
 
-//contenu du mail envoyé par nodemailer
+    //contenu du mail envoyé par nodemailer
     const mailOptions = {
         to: user.email,
         from: "dylanzabaleta@gmail.com",
@@ -91,7 +90,7 @@ loginRouter.post('/forgot', async (req, res, next) => {
             'http://localhost:3000/valid-password-token/' + resettoken.resettoken + '\n\n' +
             'If you did not request this, please ignore this email and your password will remain unchanged.\n'
     };
-//check if erreur lors de l'envoie du mail
+    //check if erreur lors de l'envoie du mail
     const sendEmail = () => {
         transporter.sendMail(mailOptions, (err, info) => {
             //mettre ici un gestion d'erreur
@@ -101,16 +100,19 @@ loginRouter.post('/forgot', async (req, res, next) => {
     sendEmail()
 })
 
-;
+    ;
 
 loginRouter.get('/valid-password-token/:token', async (req, res) => {
     console.log('PARAM RESETTOKEN lors du clic mail ==== ' + req.params.token);
     const user = await User.findOne({
-        resetPasswordToken: {$regex: "" + req.params.token + ""}, resetPasswordExpires: {$gt: Date.now()}
+        resetPasswordToken: { $regex: "" + req.params.token + "" }, resetPasswordExpires: { $gt: Date.now() }
     });
     if (!user) {
+        console.log('plus de token valide ! ');
         return res.redirect('/forgot');
+
     }
+    // res.redirect('http://localhost:3000/inscription')
     console.log('CHECK SI USER TROUVER ====OK');
     console.log('RESET MDP DE L-USER AUTORISE ====OK');
     console.log('REDIRECTION VERS FORMULAIRE RESET ====OK')
@@ -121,8 +123,8 @@ loginRouter.post('/new-password', async (req, res, next) => {
     const saltRounds = 10;
     const passwordHash = await bcrypt.hash(req.body.password, saltRounds);
     console.log('GENERATION DU MDP HASH ====OK');
-    const filter = {resetPasswordToken: {$regex: "" + req.body.token + ""}, resetPasswordExpires: {$gt: Date.now()}};
-    const update = {passwordHash: passwordHash, resetPasswordToken: undefined, resetPasswordExpires: undefined};
+    const filter = { resetPasswordToken: { $regex: "" + req.body.token + "" }, resetPasswordExpires: { $gt: Date.now() } };
+    const update = { passwordHash: passwordHash, resetPasswordToken: undefined, resetPasswordExpires: undefined };
     await User.findOneAndUpdate(filter, update, (error, doc) => {
 
     });

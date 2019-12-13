@@ -3,7 +3,6 @@ const bcrypt = require('bcrypt');
 //_____________________________________________________________________________________________________
 const usersRouter = require('express').Router();
 const User = require('../models/user');
-const jwt = require('jsonwebtoken');
 
 //____AJOUTER DUN NOUVEL UTILISATEUR_________________________________________________________________________
 usersRouter.post('/', async (request, response, next) => {
@@ -19,13 +18,11 @@ usersRouter.post('/', async (request, response, next) => {
             role: 'user',
             passwordHash,
         });
-
-        // user.notes = user.notes.concat(savedNote._id);
         const savedUser = await user.save();
-        console.log(savedUser);
+        // console.log(savedUser);
         response.json(savedUser)
-    } catch (exception) {
-        next(exception)
+    } catch (e) {
+        next(e)
     }
 });
 //________AFFICHAGE ALL USERS_______________________________________________________________________________________
